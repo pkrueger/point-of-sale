@@ -21,31 +21,56 @@
     <title>Ice Cream Parlor</title>
   </head>
   <body>
+    <header>
+      <p class="text-center">Order Some Ice Cream</p>
+    </header>
     <main>
-      <section class="container-fluid p-4">
+      <section class="container-fluid p-4 cart-container">
         <div class="row">
           <div class="col-md-5">
-            <div class="row">
+            <div class="row text-center">
               <div class="col-6">Name</div>
               <div class="col-2">Qty</div>
               <div class="col-2">Each</div>
               <div class="col-2">Total</div>
             </div>
             <hr />
+            <!-- Row for cart -->
             <div class="row">
-              <div class="col-6">Strawberry</div>
-              <div class="col-2">2</div>
-              <div class="col-2">$4</div>
-              <div class="col-2">$8</div>
+              <div id="cart" class="col">
+                <!-- Area for Cart -->
+              </div>
+            </div>
+            <div class="d-flex justify-content-between">
+              <button class="btn" onclick="checkoutCart()">Checkout</button>
+              <p class="text-end mb-0">
+                Grand Total: $<span id="total">0</span>
+              </p>
             </div>
           </div>
-          <div class="col-md-7">
-            <h1 class="menu-heading">Toppings</h1>
-            <div class="toppings"></div>
-            <h1 class="menu-heading">Vessels</h1>
-            <div class="vessels"></div>
-            <h1 class="menu-heading">Flavors</h1>
-            <div class="flavors"></div>
+
+          <!-- Menu Items -->
+          <div class="col-md-7 d-flex flex-column align-items-center">
+            <h1>Menu</h1>
+
+            <div class="toppings-container">
+              <h2 class="menu-heading text-center">Toppings</h2>
+              <div id="toppings" class="row justify-content-center">
+                <!-- Toppings here -->
+              </div>
+            </div>
+            <div class="vessels-container">
+              <h2 class="menu-heading">Vessels</h2>
+              <div id="vessels" class="row justify-content-center">
+                <!-- Vessels here -->
+              </div>
+            </div>
+            <div class="flavors-container">
+              <h2 class="menu-heading">Flavors</h2>
+              <div id="flavors" class="row justify-content-center">
+                <!-- Flavors here -->
+              </div>
+            </div>
           </div>
         </div>
       </section>
