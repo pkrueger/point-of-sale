@@ -6,6 +6,7 @@ const options = {
         "https://celebratingsweets.com/wp-content/uploads/2014/04/Cookie-Dough-Ice-Cream-1-5.jpg",
       price: 1,
       quantity: 0,
+      category: "flavor",
     },
     {
       name: "Vanilla",
@@ -13,6 +14,7 @@ const options = {
         "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/ultimate-vanilla-ice-cream-1628511695.jpg",
       price: 1,
       quantity: 0,
+      category: "flavor",
     },
     {
       name: "Strawberry",
@@ -20,6 +22,7 @@ const options = {
         "https://www.realfoodwithjessica.com/wp-content/uploads/2017/07/paleostrawberryicecream2.jpg",
       price: 2,
       quantity: 0,
+      category: "flavor",
     },
   ],
   vessels: [
@@ -27,11 +30,15 @@ const options = {
       name: "Waffle Cone",
       image: "https://m.media-amazon.com/images/I/71VNjBMakfL._SL1500_.jpg",
       price: 2,
+      category: "vessel",
+      quantity: 0,
     },
     {
       name: "Waffle Bowl",
       image: "http://images.wbmason.com/350/L_JOY66050.jpg",
       price: 4,
+      category: "vessel",
+      quantity: 0,
     },
   ],
   toppings: [
@@ -40,45 +47,79 @@ const options = {
       image:
         "https://upload.wikimedia.org/wikipedia/commons/f/f6/Sprinkles2.jpg",
       price: 1,
+      category: "topping",
+      quantity: 0,
     },
     {
       name: "Chocolate Chips",
       image:
         "https://www.eatthis.com/wp-content/uploads/sites/4/2020/05/chocolate-chips.jpg?quality=82&strip=1&resize=640%2C360",
       price: 2,
+      category: "topping",
+      quantity: 0,
     },
   ],
 };
 
 // Empty Cart
-let cart = [
-  {
-    name: "Strawberry",
-    price: 4,
-    quantity: 2,
-  },
-];
+// I'm using this method because I want things to show up in the cart in the
+//  order they are clicked in.
+let cart = [];
 
-let cartItemTemplate = {
-  name: "Strawberry",
-  price: 4,
-  quantity: 2,
-};
+// Invoke by onclick on all menu items.
+// Uses searchCart() to only let one topping or vessel be added in the cart.
+// If the category is flavor use the searchCart() to see if only the quantity
+//  needs to be updated.
+// If flavor, topping or vessel have not been added to the cart yet it will
+//  be pushed to the end of cart with the price and updateQuantity() will add
+//  a quantity to the object in the cart.
+function addToCart(name, category) {
+  let item = returnItem(name, category);
+  let isInCart = searchCart(name);
+  let alreadyHasVessel = searchVessel(name);
 
-// Make it so that the toppings and vessels can only be added once
-// Invoke by onclick on all menu items
-function addToCart(name) {}
+  if (!isInCart && !alreadyHasVessel) {
+    item.quantity++;
+    console.log(item.quantity);
+    cart.push(item);
+  } else if (category == "flavor") {
+    item.quantity++;
+  }
 
-// Returns the category of what is passed to addToCart
-function findCategory(name) {}
+  drawCart();
+}
 
-// Searches cart to see if something shows up inside
-function searchCart(name) {}
+// Searches cart to see if item shows up inside
+function searchCart(name) {
+  if (cart.find((item) => item.name === name)) {
+    return true;
+  } else {
+    return false;
+  }
+}
 
-// This will be run inside of drawCart()
-// Looks at the amount of times something shows up in the cart and returns it
-// for the quantity
-function updateQuantity() {}
+// Searches if there is already a vessel in the cart
+function searchVessel(name) {
+  if (name == "Waffle Cone") {
+    return searchCart("Waffle Bowl");
+  }
+  if (name == "Waffle Bowl") {
+    return searchCart("Waffle Cone");
+  }
+
+  return false;
+}
+
+// Returns full object with name and category given
+function returnItem(name, category) {
+  if (category == "topping") {
+    return options.toppings[options.toppings.findIndex((o) => o.name === name)];
+  } else if (category == "vessel") {
+    return options.vessels[options.vessels.findIndex((o) => o.name === name)];
+  } else {
+    return options.flavors[options.flavors.findIndex((o) => o.name === name)];
+  }
+}
 
 // Totals all items in cart
 function totalCart() {
@@ -91,6 +132,28 @@ function totalCart() {
   document.getElementById("total").innerText = total;
 }
 
+// Clears out cart
+// Invoke in onclick from a checkout button
+function checkoutCart() {
+  if (confirm("Checkout?")) {
+    cart = [];
+    drawCart();
+  }
+}
+
+// Removes an item from the cart
+// Invoke in onclick on an html button or icon
+function removeFromCart(name, category) {
+  let item = returnItem(name, category);
+  item.quantity--;
+
+  if (!item.quantity) {
+    cart.splice(cart[cart.findIndex((o) => o == item)], 1);
+  }
+
+  drawCart();
+}
+
 // Draw from looking at the cart
 // May need to split into 3 functions for each category
 // Invoke inside addToCart
@@ -100,8 +163,13 @@ function drawCart() {
   for (const item of cart) {
     if (item.quantity) {
       template += `
-                <div class="row text-center">
-                  <div class="col-6">${item.name}</div>
+                <div class="row text-center cart-item">
+                  <div class="col-6">
+                    <span onclick="removeFromCart('${item.name}', '${
+        item.category
+      }')">✖️</span>
+                    ${item.name}
+                  </div>
                   <div class="col-2">${item.quantity}</div>
                   <div class="col-2">${item.price}</div>
                   <div class="col-2">${item.quantity * item.price}</div>
@@ -111,6 +179,7 @@ function drawCart() {
 
   // @ts-ignore
   document.getElementById("cart").innerHTML = template;
+  totalCart();
 }
 
 // Looks at the options array and prints out all choices based on the category
@@ -121,13 +190,12 @@ function drawMenu() {
   drawFlavorsMenu();
 }
 // #region
-
 function drawToppingsMenu() {
   let template = "";
 
   for (const topping of options.toppings) {
     template += `
-                <div class="col-md-3">
+                <div class="col-md-3" onclick="addToCart('${topping.name}', '${topping.category}')">
                   <img src="${topping.image}" alt="${topping.name}"
                   class="img-fluid"
                   />
@@ -143,7 +211,7 @@ function drawVesselsMenu() {
 
   for (const vessel of options.vessels) {
     template += `
-                <div class="col-md-3">
+                <div class="col-md-3" onclick="addToCart('${vessel.name}', '${vessel.category}')">
                   <img src="${vessel.image}" alt="${vessel.name}"
                   class="img-fluid"
                   />
@@ -159,7 +227,7 @@ function drawFlavorsMenu() {
 
   for (const flavor of options.flavors) {
     template += `
-                <div class="col-md-3">
+                <div class="col-md-3" onclick="addToCart('${flavor.name}', '${flavor.category}')">
                   <img src="${flavor.image}" alt="${flavor.name}"
                   class="img-fluid"
                   />
@@ -170,17 +238,5 @@ function drawFlavorsMenu() {
   document.getElementById("flavors").innerHTML = template;
 }
 // #endregion
-
-// Clears out cart
-// Invoke in onclick from a checkout button
-function checkoutCart() {
-  if (confirm("Checkout?")) {
-    cart = [];
-  }
-}
-
-// Removes an item from the cart
-// Invoke in onclick on an html button or icon
-function removeFromCart() {}
 
 drawMenu();
